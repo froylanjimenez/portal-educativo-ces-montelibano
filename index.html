@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portal Educativo &mdash; Concentracion Educativa del Sur de Montelibano</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #1a3a6b 0%, #2d6ea8 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 0 16px;
+}
+.container {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.35);
+  width: 100%;
+  max-width: 600px;
+  padding: 36px 36px 28px 36px;
+  animation: slideIn .45s ease-out;
+}
+@keyframes slideIn { from{opacity:0;transform:translateY(-24px)} to{opacity:1;transform:translateY(0)} }
+.logo {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg,#1a3a6b,#2d6ea8);
+  border-radius: 50%;
+  margin: 0 auto 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; color: #fff;
+  box-shadow: 0 8px 24px rgba(26,58,107,.3);
+}
+.header { text-align:center; margin-bottom:26px; }
+.header h1 { color:#1a3a6b; font-size:21px; font-weight:700; line-height:1.3; }
+.header h2 { color:#7f8c8d; font-size:13px; margin-top:6px; }
+.tabs {
+  display:flex; gap:8px;
+  background:#f0f2f8; border-radius:14px; padding:5px; margin-bottom:24px;
+}
+.tab-btn {
+  flex:1; padding:11px 6px; border:none; border-radius:10px;
+  font-size:13px; font-weight:700; cursor:pointer; transition:.2s;
+  background:transparent; color:#7f8c8d; line-height:1.3;
+}
+.tab-btn.active {
+  background:#fff; color:#1a3a6b;
+  box-shadow: 0 4px 14px rgba(0,0,0,.12);
+}
+.section { display:none; }
+.section.active { display:block; }
+.info-box {
+  background:#e8f0fb; border-left:4px solid #1a3a6b;
+  border-radius:8px; padding:11px 14px;
+  font-size:13px; color:#1a3a6b; margin-bottom:20px; line-height:1.5;
+}
+label.field-label { display:block; font-weight:600; color:#2c3e50; font-size:13px; margin-bottom:6px; }
+select, input[type=text] {
+  width:100%; padding:13px 14px; border:2px solid #ecf0f1;
+  border-radius:10px; font-size:15px; outline:none; transition:.25s;
+  font-family: inherit; background:#fff; color:#2c3e50;
+}
+select:focus, input[type=text]:focus { border-color:#1a3a6b; box-shadow:0 0 0 3px rgba(26,58,107,.1); }
+.field { margin-bottom:16px; }
+.search-btn {
+  width:100%; padding:15px; color:#fff; border:none; border-radius:10px;
+  font-size:16px; font-weight:700; cursor:pointer; transition:.25s;
+  background: linear-gradient(135deg,#1a3a6b,#2d6ea8);
+  box-shadow: 0 8px 24px rgba(26,58,107,.3);
+}
+.search-btn:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(26,58,107,.35); }
+.search-btn:active { transform:translateY(0); }
+#resultados { margin-top:20px; }
+.result-card {
+  background:#f4f7fb;
+  border-left:5px solid #1a3a6b;
+  border-radius:10px; padding:14px 16px; margin-bottom:10px;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  cursor:pointer; transition:.2s; text-decoration:none;
+}
+.result-card:hover { transform:translateX(4px); box-shadow:0 4px 18px rgba(0,0,0,.1); }
+.r-nombre { font-size:15px; font-weight:700; color:#1a3a6b; }
+.r-info { font-size:12px; color:#7f8c8d; margin-top:3px; }
+.r-nota { font-size:24px; font-weight:700; color:#1a3a6b; min-width:56px; text-align:center; }
+.r-nota small { display:block; font-size:11px; font-weight:600; }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; color:#fff; }
+.b-s{background:#1a7a1a} .b-a{background:#2d7fcc} .b-b{background:#d48a00} .b-l{background:#c00}
+.no-result { text-align:center; padding:28px 0; color:#aaa; font-size:14px; }
+.error-box {
+  background:#fdecea; border-left:4px solid #e53935;
+  border-radius:8px; padding:11px 14px; font-size:13px; color:#b71c1c;
+  margin-top:14px; display:none;
+}
+.rep-group { margin-bottom:20px; }
+.rep-group-title { font-size:13px; font-weight:700; color:#888; text-transform:uppercase;
+                    letter-spacing:.5px; margin-bottom:10px; }
+.rep-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.rep-btn {
+  display:flex; align-items:center; gap:8px;
+  padding:11px 13px; background:#f4f7fb;
+  border:1.5px solid #dde4f0; border-radius:10px;
+  color:#1a3a6b; font-size:13px; font-weight:600;
+  text-decoration:none; transition:.18s;
+}
+.rep-btn:hover { background:#1a3a6b; color:#fff; border-color:#1a3a6b; }
+.rep-ico { font-size:16px; }
+.rep-section-title {
+  font-size:14px; font-weight:700; color:#1a3a6b;
+  border-left:4px solid #1a3a6b; padding-left:9px; margin:0 0 14px 0;
+}
+.subtabs {
+  display:flex; gap:6px;
+  background:#f0f2f8; border-radius:12px; padding:4px; margin-bottom:20px;
+}
+.subtab-btn {
+  flex:1; padding:9px 6px; border:none; border-radius:9px;
+  font-size:13px; font-weight:700; cursor:pointer; transition:.2s;
+  background:transparent; color:#7f8c8d;
+}
+.subtab-btn.active {
+  background:#fff; color:#1a3a6b;
+  box-shadow: 0 3px 10px rgba(0,0,0,.12);
+}
+.subsection { display:none; }
+.subsection.active { display:block; }
+.dl-btn {
+  width:100%; padding:15px; color:#fff; border:none; border-radius:10px;
+  font-size:16px; font-weight:700; cursor:pointer; transition:.25s;
+  background: linear-gradient(135deg,#1a7a1a,#2e9c2e);
+  box-shadow: 0 8px 24px rgba(26,122,26,.25); margin-top:6px;
+}
+.dl-btn:hover { transform:translateY(-2px); }
+.dl-btn:active { transform:translateY(0); }
+footer {
+  width:100%; max-width:600px; text-align:center;
+  padding:18px 0 22px 0; color:rgba(255,255,255,.75); font-size:12px; margin-top:14px;
+}
+footer strong { display:block; font-size:14px; color:#fff; letter-spacing:1px; margin-top:4px; }
+/* ── Modal contraseña ── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(10,20,50,.55); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; z-index:999;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:#fff; border-radius:18px;
+  box-shadow:0 24px 64px rgba(0,0,0,.35);
+  padding:36px 32px 28px; width:90%; max-width:360px;
+  animation:slideIn .3s ease-out; text-align:center;
+}
+.modal-box h3 { color:#1a3a6b; font-size:17px; margin-bottom:6px; }
+.modal-box p  { color:#7f8c8d; font-size:13px; margin-bottom:20px; }
+.modal-box input {
+  width:100%; padding:13px 14px; border:2px solid #ecf0f1;
+  border-radius:10px; font-size:16px; outline:none; transition:.25s;
+  font-family:inherit; text-align:center; letter-spacing:3px;
+  color:#1a3a6b; font-weight:700;
+}
+.modal-box input:focus { border-color:#1a3a6b; box-shadow:0 0 0 3px rgba(26,58,107,.1); }
+.modal-box input.error { border-color:#e53935; animation:shake .3s; }
+@keyframes shake {
+  0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}
+}
+.modal-actions { display:flex; gap:10px; margin-top:16px; }
+.modal-btn-ok {
+  flex:1; padding:13px; background:linear-gradient(135deg,#1a3a6b,#2d6ea8);
+  color:#fff; border:none; border-radius:10px; font-size:14px;
+  font-weight:700; cursor:pointer; transition:.2s;
+}
+.modal-btn-ok:hover { transform:translateY(-2px); box-shadow:0 6px 18px rgba(26,58,107,.3); }
+.modal-btn-cancel {
+  flex:1; padding:13px; background:#f0f2f8;
+  color:#7f8c8d; border:none; border-radius:10px; font-size:14px;
+  font-weight:700; cursor:pointer; transition:.2s;
+}
+.modal-btn-cancel:hover { background:#e2e6f0; }
+.modal-error { color:#e53935; font-size:12px; margin-top:8px; min-height:18px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">&#127979;</div>
+    <h1>Concentracion Educativa del Sur de Montelibano</h1>
+    <h2>Examen Final de Primer Periodo &mdash; 2026</h2>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('buscar',this)">&#128269;<br>Estudiantes</button>
+    <button class="tab-btn" id="btn-informes" onclick="pedirClave(this)">&#128203;<br>Informes</button>
+    <button class="tab-btn" onclick="showTab('descargas',this)">&#128190;<br>Descargar Notas</button>
+  </div>
+
+  <!-- ── BUSCAR ESTUDIANTE ── -->
+  <div id="tab-buscar" class="section active">
+    <div class="info-box">
+      &#128161; Selecciona el grado e ingresa el nombre para consultar el informe.
+    </div>
+    <div class="field">
+      <label class="field-label" for="sel-grado">Grado</label>
+      <select id="sel-grado">
+        <option value="">Todos los grados</option>
+        <option value="Decimo">Decimo (10°)</option>
+<option value="Noveno">Noveno (9°)</option>
+<option value="Octavo">Octavo (8°)</option>
+<option value="Septimo">Septimo (7°)</option>
+<option value="Sexto">Sexto (6°)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label" for="inp-nombre">Nombre o apellido</label>
+      <input type="text" id="inp-nombre" placeholder="Escribe al menos 2 letras..." autocomplete="off"
+             onkeydown="if(event.key==='Enter')buscar()">
+    </div>
+    <button class="search-btn" onclick="buscar()">&#128269; Buscar Informe</button>
+    <div class="error-box" id="error-box"></div>
+    <div id="resultados"></div>
+  </div>
+
+  <!-- ── INFORMES ── -->
+  <div id="tab-docentes" class="section">
+    <div class="subtabs">
+      <button class="subtab-btn active" onclick="showSubtab('sub-directores',this)">&#128101; Director de Grupo</button>
+      <button class="subtab-btn" onclick="showSubtab('sub-docentes',this)">&#128218; Informe Docente</button>
+      <button class="subtab-btn" onclick="showSubtab('sub-desglose',this)">&#128202; Desglose por Pregunta</button>
+    </div>
+    <div id="sub-directores" class="subsection active">
+      <div class="rep-group"><div class="rep-group-title">Decimo</div><div class="rep-grid"><a href="informes/Decimo/directores/Director_Decimo_A.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo A</a><a href="informes/Decimo/directores/Director_Decimo_B.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo B</a><a href="informes/Decimo/directores/Director_Decimo_C.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo C</a><a href="informes/Decimo/directores/Director_Decimo_D.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo D</a><a href="informes/Decimo/directores/Director_Decimo_E.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo E</a><a href="informes/Decimo/directores/Director_Decimo_F.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Decimo F</a></div></div><div class="rep-group"><div class="rep-group-title">Noveno</div><div class="rep-grid"><a href="informes/Noveno/directores/Director_Noveno_A.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno A</a><a href="informes/Noveno/directores/Director_Noveno_B.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno B</a><a href="informes/Noveno/directores/Director_Noveno_C.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno C</a><a href="informes/Noveno/directores/Director_Noveno_D.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno D</a><a href="informes/Noveno/directores/Director_Noveno_E.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno E</a><a href="informes/Noveno/directores/Director_Noveno_F.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Noveno F</a></div></div><div class="rep-group"><div class="rep-group-title">Octavo</div><div class="rep-grid"><a href="informes/Octavo/directores/Director_Octavo_A.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo A</a><a href="informes/Octavo/directores/Director_Octavo_B.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo B</a><a href="informes/Octavo/directores/Director_Octavo_C.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo C</a><a href="informes/Octavo/directores/Director_Octavo_D.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo D</a><a href="informes/Octavo/directores/Director_Octavo_E.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo E</a><a href="informes/Octavo/directores/Director_Octavo_F.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Octavo F</a></div></div><div class="rep-group"><div class="rep-group-title">Septimo</div><div class="rep-grid"><a href="informes/Septimo/directores/Director_Septimo_A.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo A</a><a href="informes/Septimo/directores/Director_Septimo_B.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo B</a><a href="informes/Septimo/directores/Director_Septimo_C.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo C</a><a href="informes/Septimo/directores/Director_Septimo_D.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo D</a><a href="informes/Septimo/directores/Director_Septimo_E.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo E</a><a href="informes/Septimo/directores/Director_Septimo_F.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Septimo F</a></div></div><div class="rep-group"><div class="rep-group-title">Sexto</div><div class="rep-grid"><a href="informes/Sexto/directores/Director_Sexto_A.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto A</a><a href="informes/Sexto/directores/Director_Sexto_B.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto B</a><a href="informes/Sexto/directores/Director_Sexto_C.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto C</a><a href="informes/Sexto/directores/Director_Sexto_D.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto D</a><a href="informes/Sexto/directores/Director_Sexto_E.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto E</a><a href="informes/Sexto/directores/Director_Sexto_F.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128101;</span>Sexto F</a></div></div>
+    </div>
+    <div id="sub-docentes" class="subsection">
+      <div class="rep-group"><div class="rep-group-title">Decimo</div><div class="rep-grid"><a href="informes/Decimo/docentes/Matematicas_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Matematicas</a><a href="informes/Decimo/docentes/Filosofia_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Filosofia</a><a href="informes/Decimo/docentes/Lengua_Castellana_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Lengua Castellana</a><a href="informes/Decimo/docentes/Etica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Etica</a><a href="informes/Decimo/docentes/Ciencias_Sociales_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Sociales</a><a href="informes/Decimo/docentes/C__Politicas_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>C. Politicas</a><a href="informes/Decimo/docentes/Quimica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Quimica</a><a href="informes/Decimo/docentes/Ed__Fisica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ed. Fisica</a><a href="informes/Decimo/docentes/Fisica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Fisica</a><a href="informes/Decimo/docentes/Religion_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Religion</a><a href="informes/Decimo/docentes/Ingles_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ingles</a><a href="informes/Decimo/docentes/Tecnologia_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Noveno</div><div class="rep-grid"><a href="informes/Noveno/docentes/Matematicas_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Matematicas</a><a href="informes/Noveno/docentes/Etica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Etica</a><a href="informes/Noveno/docentes/Lengua_Castellana_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Lengua Castellana</a><a href="informes/Noveno/docentes/Ed__Fisica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ed. Fisica</a><a href="informes/Noveno/docentes/Ciencias_Sociales_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Sociales</a><a href="informes/Noveno/docentes/Gestion_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Gestion</a><a href="informes/Noveno/docentes/Ciencias_Naturales_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Naturales</a><a href="informes/Noveno/docentes/Artistica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Artistica</a><a href="informes/Noveno/docentes/Ingles_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ingles</a><a href="informes/Noveno/docentes/Religion_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Religion</a><a href="informes/Noveno/docentes/Tecnologia_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Octavo</div><div class="rep-grid"><a href="informes/Octavo/docentes/Matematicas_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Matematicas</a><a href="informes/Octavo/docentes/Etica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Etica</a><a href="informes/Octavo/docentes/Lengua_Castellana_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Lengua Castellana</a><a href="informes/Octavo/docentes/Ed__Fisica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ed. Fisica</a><a href="informes/Octavo/docentes/Ciencias_Sociales_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Sociales</a><a href="informes/Octavo/docentes/Gestion_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Gestion</a><a href="informes/Octavo/docentes/Ciencias_Naturales_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Naturales</a><a href="informes/Octavo/docentes/Artistica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Artistica</a><a href="informes/Octavo/docentes/Ingles_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ingles</a><a href="informes/Octavo/docentes/Religion_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Religion</a><a href="informes/Octavo/docentes/Tecnologia_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Septimo</div><div class="rep-grid"><a href="informes/Septimo/docentes/Matematicas_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Matematicas</a><a href="informes/Septimo/docentes/Etica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Etica</a><a href="informes/Septimo/docentes/Lengua_Castellana_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Lengua Castellana</a><a href="informes/Septimo/docentes/Ed__Fisica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ed. Fisica</a><a href="informes/Septimo/docentes/Ciencias_Sociales_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Sociales</a><a href="informes/Septimo/docentes/Gestion_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Gestion</a><a href="informes/Septimo/docentes/Ciencias_Naturales_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Naturales</a><a href="informes/Septimo/docentes/Artistica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Artistica</a><a href="informes/Septimo/docentes/Ingles_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ingles</a><a href="informes/Septimo/docentes/Religion_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Religion</a><a href="informes/Septimo/docentes/Tecnologia_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Sexto</div><div class="rep-grid"><a href="informes/Sexto/docentes/Matematicas_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Matematicas</a><a href="informes/Sexto/docentes/Etica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Etica</a><a href="informes/Sexto/docentes/Lengua_Castellana_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Lengua Castellana</a><a href="informes/Sexto/docentes/Ed__Fisica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ed. Fisica</a><a href="informes/Sexto/docentes/Ciencias_Sociales_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Sociales</a><a href="informes/Sexto/docentes/Gestion_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Gestion</a><a href="informes/Sexto/docentes/Ciencias_Naturales_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ciencias Naturales</a><a href="informes/Sexto/docentes/Artistica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Artistica</a><a href="informes/Sexto/docentes/Ingles_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Ingles</a><a href="informes/Sexto/docentes/Religion_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Religion</a><a href="informes/Sexto/docentes/Tecnologia_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128218;</span>Tecnologia</a></div></div>
+    </div>
+    <div id="sub-desglose" class="subsection">
+      <div class="rep-group"><div class="rep-group-title">Decimo</div><div class="rep-grid"><a href="informes/Decimo/desglose/desglose_Matematicas_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Matematicas</a><a href="informes/Decimo/desglose/desglose_Filosofia_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Filosofia</a><a href="informes/Decimo/desglose/desglose_Lengua_Castellana_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Lengua Castellana</a><a href="informes/Decimo/desglose/desglose_Etica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Etica</a><a href="informes/Decimo/desglose/desglose_Ciencias_Sociales_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Sociales</a><a href="informes/Decimo/desglose/desglose_C__Politicas_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>C. Politicas</a><a href="informes/Decimo/desglose/desglose_Quimica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Quimica</a><a href="informes/Decimo/desglose/desglose_Ed__Fisica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ed. Fisica</a><a href="informes/Decimo/desglose/desglose_Fisica_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Fisica</a><a href="informes/Decimo/desglose/desglose_Religion_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Religion</a><a href="informes/Decimo/desglose/desglose_Ingles_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ingles</a><a href="informes/Decimo/desglose/desglose_Tecnologia_Decimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Noveno</div><div class="rep-grid"><a href="informes/Noveno/desglose/desglose_Matematicas_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Matematicas</a><a href="informes/Noveno/desglose/desglose_Etica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Etica</a><a href="informes/Noveno/desglose/desglose_Lengua_Castellana_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Lengua Castellana</a><a href="informes/Noveno/desglose/desglose_Ed__Fisica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ed. Fisica</a><a href="informes/Noveno/desglose/desglose_Ciencias_Sociales_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Sociales</a><a href="informes/Noveno/desglose/desglose_Gestion_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Gestion</a><a href="informes/Noveno/desglose/desglose_Ciencias_Naturales_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Naturales</a><a href="informes/Noveno/desglose/desglose_Artistica_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Artistica</a><a href="informes/Noveno/desglose/desglose_Ingles_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ingles</a><a href="informes/Noveno/desglose/desglose_Religion_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Religion</a><a href="informes/Noveno/desglose/desglose_Tecnologia_Noveno.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Octavo</div><div class="rep-grid"><a href="informes/Octavo/desglose/desglose_Matematicas_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Matematicas</a><a href="informes/Octavo/desglose/desglose_Etica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Etica</a><a href="informes/Octavo/desglose/desglose_Lengua_Castellana_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Lengua Castellana</a><a href="informes/Octavo/desglose/desglose_Ed__Fisica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ed. Fisica</a><a href="informes/Octavo/desglose/desglose_Ciencias_Sociales_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Sociales</a><a href="informes/Octavo/desglose/desglose_Gestion_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Gestion</a><a href="informes/Octavo/desglose/desglose_Ciencias_Naturales_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Naturales</a><a href="informes/Octavo/desglose/desglose_Artistica_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Artistica</a><a href="informes/Octavo/desglose/desglose_Ingles_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ingles</a><a href="informes/Octavo/desglose/desglose_Religion_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Religion</a><a href="informes/Octavo/desglose/desglose_Tecnologia_Octavo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Septimo</div><div class="rep-grid"><a href="informes/Septimo/desglose/desglose_Matematicas_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Matematicas</a><a href="informes/Septimo/desglose/desglose_Etica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Etica</a><a href="informes/Septimo/desglose/desglose_Lengua_Castellana_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Lengua Castellana</a><a href="informes/Septimo/desglose/desglose_Ed__Fisica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ed. Fisica</a><a href="informes/Septimo/desglose/desglose_Ciencias_Sociales_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Sociales</a><a href="informes/Septimo/desglose/desglose_Gestion_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Gestion</a><a href="informes/Septimo/desglose/desglose_Ciencias_Naturales_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Naturales</a><a href="informes/Septimo/desglose/desglose_Artistica_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Artistica</a><a href="informes/Septimo/desglose/desglose_Ingles_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ingles</a><a href="informes/Septimo/desglose/desglose_Religion_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Religion</a><a href="informes/Septimo/desglose/desglose_Tecnologia_Septimo.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Tecnologia</a></div></div><div class="rep-group"><div class="rep-group-title">Sexto</div><div class="rep-grid"><a href="informes/Sexto/desglose/desglose_Matematicas_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Matematicas</a><a href="informes/Sexto/desglose/desglose_Etica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Etica</a><a href="informes/Sexto/desglose/desglose_Lengua_Castellana_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Lengua Castellana</a><a href="informes/Sexto/desglose/desglose_Ed__Fisica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ed. Fisica</a><a href="informes/Sexto/desglose/desglose_Ciencias_Sociales_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Sociales</a><a href="informes/Sexto/desglose/desglose_Gestion_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Gestion</a><a href="informes/Sexto/desglose/desglose_Ciencias_Naturales_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ciencias Naturales</a><a href="informes/Sexto/desglose/desglose_Artistica_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Artistica</a><a href="informes/Sexto/desglose/desglose_Ingles_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Ingles</a><a href="informes/Sexto/desglose/desglose_Religion_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Religion</a><a href="informes/Sexto/desglose/desglose_Tecnologia_Sexto.html" target="_blank" class="rep-btn"><span class="rep-ico">&#128202;</span>Tecnologia</a></div></div>
+    </div>
+  </div>
+
+  <!-- ── DESCARGAR NOTAS ── -->
+  <div id="tab-descargas" class="section">
+    <div class="info-box">
+      &#128190; Selecciona el grado, el grupo y la asignatura para descargar las notas en CSV.
+    </div>
+    <div class="field">
+      <label class="field-label">Grado</label>
+      <select id="dl-grado" onchange="actualizarGrupos()">
+        <option value="">-- Seleccione grado --</option>
+        <option value="Decimo">Decimo</option>
+<option value="Noveno">Noveno</option>
+<option value="Octavo">Octavo</option>
+<option value="Septimo">Septimo</option>
+<option value="Sexto">Sexto</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">Grupo</label>
+      <select id="dl-grupo">
+        <option value="">-- Seleccione grupo --</option>
+      </select>
+    </div>
+    <div class="field">
+      <label class="field-label">Asignatura</label>
+      <select id="dl-area">
+        <option value="">-- Seleccione asignatura --</option>
+      </select>
+    </div>
+    <button class="dl-btn" onclick="descargarCSV()">&#11015; Descargar CSV</button>
+  </div>
+</div>
+
+<!-- ── Modal contraseña Informes ── -->
+<div class="modal-overlay" id="modal-clave">
+  <div class="modal-box">
+    <h3>&#128274; Acceso restringido</h3>
+    <p>Ingresa la contraseña para ver los informes</p>
+    <input type="password" id="modal-input" placeholder="Contraseña"
+           onkeydown="if(event.key==='Enter')verificarClave()">
+    <div class="modal-error" id="modal-error"></div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" onclick="cerrarModal()">Cancelar</button>
+      <button class="modal-btn-ok" onclick="verificarClave()">&#128275; Ingresar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Concentracion Educativa del Sur de Montelibano &bull; Examen Final de Primer Periodo 2026
+  <strong>SOFA EDITORES</strong>
+</footer>
+
+<script src="data.js"></script>
+<script>
+const AREAS_POR_GRADO = {"Sexto": ["Matematicas", "Etica", "Lengua Castellana", "Ed. Fisica", "Ciencias Sociales", "Gestion", "Ciencias Naturales", "Artistica", "Ingles", "Religion", "Tecnologia"], "Septimo": ["Matematicas", "Etica", "Lengua Castellana", "Ed. Fisica", "Ciencias Sociales", "Gestion", "Ciencias Naturales", "Artistica", "Ingles", "Religion", "Tecnologia"], "Octavo": ["Matematicas", "Etica", "Lengua Castellana", "Ed. Fisica", "Ciencias Sociales", "Gestion", "Ciencias Naturales", "Artistica", "Ingles", "Religion", "Tecnologia"], "Noveno": ["Matematicas", "Etica", "Lengua Castellana", "Ed. Fisica", "Ciencias Sociales", "Gestion", "Ciencias Naturales", "Artistica", "Ingles", "Religion", "Tecnologia"], "Decimo": ["Matematicas", "Filosofia", "Lengua Castellana", "Etica", "Ciencias Sociales", "C. Politicas", "Quimica", "Ed. Fisica", "Fisica", "Religion", "Ingles", "Tecnologia"]};
+var _informesDesbloqueado = false;
+var _btnInformes = null;
+function pedirClave(btn) {
+  if (_informesDesbloqueado) {
+    showTab('docentes', btn);
+    return;
+  }
+  _btnInformes = btn;
+  document.getElementById('modal-input').value = '';
+  document.getElementById('modal-error').textContent = '';
+  document.getElementById('modal-input').classList.remove('error');
+  document.getElementById('modal-clave').classList.add('open');
+  setTimeout(function(){ document.getElementById('modal-input').focus(); }, 80);
+}
+function verificarClave() {
+  var val = document.getElementById('modal-input').value;
+  if (val === 'CESUM2026') {
+    _informesDesbloqueado = true;
+    document.getElementById('modal-clave').classList.remove('open');
+    showTab('docentes', _btnInformes);
+  } else {
+    var inp = document.getElementById('modal-input');
+    inp.classList.add('error');
+    document.getElementById('modal-error').textContent = 'Contraseña incorrecta. Inténtalo de nuevo.';
+    inp.value = '';
+    setTimeout(function(){ inp.classList.remove('error'); }, 400);
+  }
+}
+function cerrarModal() {
+  document.getElementById('modal-clave').classList.remove('open');
+}
+function showSubtab(id, btn) {
+  document.querySelectorAll('.subsection').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.subtab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('resultados').innerHTML = '';
+  document.getElementById('error-box').style.display = 'none';
+}
+
+function norm(s) {
+  return String(s).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ').trim();
+}
+function badgeN(n) {
+  if (n >= 90) return '<span class="badge b-s">Superior</span>';
+  if (n >= 70) return '<span class="badge b-a">Alto</span>';
+  if (n >= 60) return '<span class="badge b-b">Basico</span>';
+  return '<span class="badge b-l">Bajo</span>';
+}
+
+function buscar() {
+  var grado  = document.getElementById('sel-grado').value;
+  var query  = norm(document.getElementById('inp-nombre').value);
+  var divRes = document.getElementById('resultados');
+  var errBox = document.getElementById('error-box');
+  errBox.style.display = 'none';
+  divRes.innerHTML = '';
+
+  if (!grado && query.length < 2) {
+    errBox.textContent = 'Selecciona un grado o escribe al menos 2 letras del nombre.';
+    errBox.style.display = 'block';
+    return;
+  }
+
+  var res = ESTUDIANTES.filter(function(e) {
+    var okGrado  = !grado  || e.grupo.indexOf(grado) === 0;
+    var okNombre = !query  || norm(e.nombre).indexOf(query) !== -1;
+    return okGrado && okNombre;
+  });
+
+  if (res.length === 0) {
+    divRes.innerHTML = '<div class="no-result">No se encontraron estudiantes.</div>';
+    return;
+  }
+
+  res.sort(function(a,b){ return b.promedio - a.promedio; });
+  var shown = res.slice(0, 60);
+
+  var html = shown.map(function(e) {
+    return '<a class="result-card" href="' + e.archivo + '" target="_blank">'
+      + '<div>'
+      + '<div class="r-nombre">' + e.nombre + '</div>'
+      + '<div class="r-info">' + e.grupo + ' &bull; ID: ' + e.id + '</div>'
+      + '</div>'
+      + '<div class="r-nota">' + e.promedio.toFixed(1) + '<small>' + badgeN(e.promedio) + '</small></div>'
+      + '</a>';
+  }).join('');
+
+  if (res.length > 60) {
+    html += '<div class="no-result">Mostrando 60 de ' + res.length + '. Refina la busqueda.</div>';
+  }
+  divRes.innerHTML = html;
+}
+
+function actualizarGrupos() {
+  var grado = document.getElementById('dl-grado').value;
+  var selG  = document.getElementById('dl-grupo');
+  var selA  = document.getElementById('dl-area');
+  selG.innerHTML = '<option value="">-- Seleccione grupo --</option>';
+  selA.innerHTML = '<option value="">-- Seleccione asignatura --</option>';
+  if (grado && GRUPOS_POR_GRADO[grado]) {
+    GRUPOS_POR_GRADO[grado].forEach(function(g) {
+      var opt = document.createElement('option');
+      opt.value = g; opt.textContent = g;
+      selG.appendChild(opt);
+    });
+  }
+  if (grado && AREAS_POR_GRADO[grado]) {
+    AREAS_POR_GRADO[grado].forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a; opt.textContent = a;
+      selA.appendChild(opt);
+    });
+  }
+}
+
+function descargarCSV() {
+  var grado = document.getElementById('dl-grado').value;
+  var grupo = document.getElementById('dl-grupo').value;
+  var area  = document.getElementById('dl-area').value;
+
+  if (!grado || !grupo || !area) {
+    alert('Por favor selecciona grado, grupo y asignatura.');
+    return;
+  }
+
+  var datos = ESTUDIANTES.filter(function(e){ return e.grupo === grupo; });
+  if (!datos.length) { alert('No hay estudiantes en ese grupo.'); return; }
+
+  datos.sort(function(a,b){ return a.nombre.localeCompare(b.nombre); });
+
+  var lines = ['Codigo,Apellidos y Nombres,Grupo,' + area + ' (/100)'];
+  datos.forEach(function(e) {
+    var nota = e.notas[area] !== undefined ? e.notas[area].toFixed(1) : '';
+    lines.push('"' + e.id + '","' + e.nombre + '","' + e.grupo + '",' + nota);
+  });
+
+  var csv  = '\uFEFF' + lines.join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url;
+  a.download = 'Notas_' + grupo.replace(/ /g,'_') + '_' + area.replace(/ /g,'_') + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

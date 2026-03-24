@@ -179,6 +179,56 @@ footer strong { display:block; font-size:14px; color:#fff; letter-spacing:1px; m
 }
 .modal-btn-cancel:hover { background:#e2e6f0; }
 .modal-error { color:#e53935; font-size:12px; margin-top:8px; min-height:18px; }
+
+/* ── Módulo de Quejas ── */
+.queja-aviso {
+  background:#fff8e1; border-left:4px solid #f59e0b;
+  border-radius:8px; padding:11px 14px;
+  font-size:13px; color:#78350f; margin-bottom:20px; line-height:1.5;
+}
+.queja-aviso strong { display:block; margin-bottom:2px; font-size:14px; }
+.student-search-wrap { position:relative; margin-bottom:6px; }
+.student-results-drop {
+  position:absolute; top:100%; left:0; right:0; z-index:50;
+  background:#fff; border:2px solid #1a3a6b; border-top:none;
+  border-radius:0 0 10px 10px; max-height:200px; overflow-y:auto;
+  box-shadow:0 8px 20px rgba(0,0,0,.15); display:none;
+}
+.student-results-drop.open { display:block; }
+.drop-item {
+  padding:10px 14px; cursor:pointer; font-size:14px;
+  color:#2c3e50; border-bottom:1px solid #f0f2f8; transition:.15s;
+}
+.drop-item:last-child { border-bottom:none; }
+.drop-item:hover { background:#e8f0fb; color:#1a3a6b; }
+.drop-item .drop-grupo { font-size:11px; color:#7f8c8d; margin-top:2px; }
+.student-selected-badge {
+  display:none; background:#e8f0fb; border:1.5px solid #1a3a6b;
+  border-radius:8px; padding:9px 13px; font-size:13px; color:#1a3a6b;
+  font-weight:600; margin-top:6px; align-items:center; justify-content:space-between;
+}
+.student-selected-badge.show { display:flex; }
+.badge-clear {
+  background:none; border:none; color:#999; font-size:16px;
+  cursor:pointer; padding:0 2px; line-height:1;
+}
+.badge-clear:hover { color:#e53935; }
+textarea.queja-textarea {
+  width:100%; padding:13px 14px; border:2px solid #ecf0f1;
+  border-radius:10px; font-size:14px; outline:none; transition:.25s;
+  font-family:inherit; color:#2c3e50; resize:vertical; min-height:110px;
+}
+textarea.queja-textarea:focus { border-color:#1a3a6b; box-shadow:0 0 0 3px rgba(26,58,107,.1); }
+.wa-btn {
+  width:100%; padding:15px; color:#fff; border:none; border-radius:10px;
+  font-size:16px; font-weight:700; cursor:pointer; transition:.25s;
+  background:linear-gradient(135deg,#128c7e,#25d366);
+  box-shadow:0 8px 24px rgba(18,140,126,.3); margin-top:6px;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+}
+.wa-btn:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(18,140,126,.38); }
+.wa-btn:active { transform:translateY(0); }
+.wa-ico { font-size:22px; }
 </style>
 </head>
 <body>
@@ -193,7 +243,8 @@ footer strong { display:block; font-size:14px; color:#fff; letter-spacing:1px; m
   <div class="tabs">
     <button class="tab-btn active" onclick="showTab('buscar',this)">&#128269;<br>Estudiantes</button>
     <button class="tab-btn" id="btn-informes" onclick="pedirClave(this)">&#128203;<br>Informes</button>
-    <button class="tab-btn" onclick="showTab('descargas',this)">&#128190;<br>Descargar Notas</button>
+    <button class="tab-btn" onclick="showTab('descargas',this)">&#128190;<br>Descargar</button>
+    <button class="tab-btn" onclick="showTab('quejas',this)">&#128172;<br>Reclamos</button>
   </div>
 
   <!-- ── BUSCAR ESTUDIANTE ── -->
@@ -269,6 +320,43 @@ footer strong { display:block; font-size:14px; color:#fff; letter-spacing:1px; m
       </select>
     </div>
     <button class="dl-btn" onclick="descargarCSV()">&#11015; Descargar CSV</button>
+  </div>
+
+  <!-- ── QUEJAS Y RECLAMOS ── -->
+  <div id="tab-quejas" class="section">
+    <div class="queja-aviso">
+      <strong>&#9888;&#65039; Aviso importante</strong>
+      El reporte de reclamo o revisión lo debe hacer un docente.
+      Este formulario envía la solicitud directamente al equipo docente a cargo de revisiones.
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="queja-docente">Nombre del docente que reporta</label>
+      <input type="text" id="queja-docente" placeholder="Ej: Profa. María González" autocomplete="off">
+    </div>
+
+    <div class="field">
+      <label class="field-label">Estudiante</label>
+      <div class="student-search-wrap">
+        <input type="text" id="queja-buscar-est" placeholder="Buscar estudiante por nombre..."
+               autocomplete="off" oninput="buscarEstudianteQueja()" onfocus="buscarEstudianteQueja()">
+        <div class="student-results-drop" id="queja-drop"></div>
+      </div>
+      <div class="student-selected-badge" id="queja-badge">
+        <span id="queja-badge-texto"></span>
+        <button class="badge-clear" onclick="limpiarEstudianteQueja()" title="Cambiar estudiante">&#10005;</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="queja-mensaje">Inconformidad a revisar</label>
+      <textarea class="queja-textarea" id="queja-mensaje"
+                placeholder="Describe puntualmente la situación que debe revisar el equipo docente..."></textarea>
+    </div>
+
+    <button class="wa-btn" onclick="enviarReclamo()">
+      <span class="wa-ico">&#128602;</span> Enviar por WhatsApp
+    </button>
   </div>
 </div>
 
@@ -450,6 +538,87 @@ function descargarCSV() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+/* ── MÓDULO DE QUEJAS Y RECLAMOS ── */
+var _quejaEstudiante = null;
+
+function buscarEstudianteQueja() {
+  var q    = norm(document.getElementById('queja-buscar-est').value);
+  var drop = document.getElementById('queja-drop');
+  if (_quejaEstudiante) return; // ya hay uno seleccionado
+  if (q.length < 2) { drop.classList.remove('open'); return; }
+
+  var res = ESTUDIANTES.filter(function(e) {
+    return norm(e.nombre).indexOf(q) !== -1;
+  }).slice(0, 30);
+
+  if (!res.length) { drop.classList.remove('open'); return; }
+
+  drop.innerHTML = res.map(function(e) {
+    return '<div class="drop-item" onclick="seleccionarEstudianteQueja(' + JSON.stringify(e.nombre) + ',' + JSON.stringify(e.grupo) + ')">'
+      + e.nombre
+      + '<div class="drop-grupo">' + e.grupo + '</div>'
+      + '</div>';
+  }).join('');
+  drop.classList.add('open');
+}
+
+function seleccionarEstudianteQueja(nombre, grupo) {
+  _quejaEstudiante = { nombre: nombre, grupo: grupo };
+  document.getElementById('queja-buscar-est').value = '';
+  document.getElementById('queja-drop').classList.remove('open');
+  document.getElementById('queja-badge-texto').textContent = nombre + ' \u2014 ' + grupo;
+  document.getElementById('queja-badge').classList.add('show');
+}
+
+function limpiarEstudianteQueja() {
+  _quejaEstudiante = null;
+  document.getElementById('queja-buscar-est').value = '';
+  document.getElementById('queja-badge').classList.remove('show');
+  document.getElementById('queja-drop').classList.remove('open');
+}
+
+document.addEventListener('click', function(e) {
+  var wrap = document.querySelector('.student-search-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('queja-drop').classList.remove('open');
+  }
+});
+
+function enviarReclamo() {
+  var docente  = document.getElementById('queja-docente').value.trim();
+  var mensaje  = document.getElementById('queja-mensaje').value.trim();
+
+  if (!docente) {
+    alert('Por favor ingresa el nombre del docente que reporta.');
+    document.getElementById('queja-docente').focus();
+    return;
+  }
+  if (!_quejaEstudiante) {
+    alert('Por favor selecciona el estudiante.');
+    document.getElementById('queja-buscar-est').focus();
+    return;
+  }
+  if (!mensaje) {
+    alert('Por favor describe la inconformidad a revisar.');
+    document.getElementById('queja-mensaje').focus();
+    return;
+  }
+
+  var texto = [
+    '*\u26a0\ufe0f RECLAMO / REVISI\u00d3N DE NOTA \u2014 CESUM*',
+    '',
+    '*Docente que reporta:* ' + docente,
+    '*Estudiante:* ' + _quejaEstudiante.nombre,
+    '*Grado y grupo:* ' + _quejaEstudiante.grupo,
+    '',
+    '*Inconformidad a revisar:*',
+    mensaje
+  ].join('\n');
+
+  var url = 'https://wa.me/573123143379?text=' + encodeURIComponent(texto);
+  window.open(url, '_blank');
 }
 </script>
 </body>

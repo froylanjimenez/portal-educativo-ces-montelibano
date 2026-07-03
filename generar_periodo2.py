@@ -14,7 +14,7 @@ NO genera la hoja de respuestas (desglose por pregunta correcta/incorrecta).
 Reproducible: usa una semilla fija para que las notas no cambien entre corridas.
 """
 
-import os, re, json, random, unicodedata, statistics
+import os, re, json, math, random, unicodedata, statistics
 from pathlib import Path
 
 # ─── Config ───────────────────────────────────────────────────────────────────
@@ -49,6 +49,34 @@ COLORES_AREA = {
 }
 
 GRADE_NUM = {"Sexto":"6","Septimo":"7","Octavo":"8","Noveno":"9","Decimo":"10"}
+
+# ─── Numero de preguntas por area (segun cuadernillos de la evaluacion) ────────
+# Cada pregunta vale 100/N, por lo que las notas posibles son multiplos de ese
+# valor. Los puntajes se redondean HACIA ARRIBA al valor posible mas cercano.
+PREGUNTAS_6A9 = {   # Sexto, Septimo, Octavo y Noveno (cuadernillo grados 6°-9°)
+    "Matematicas": 20, "Etica": 7,  "Lengua Castellana": 20, "Ed. Fisica": 7,
+    "Ciencias Sociales": 20, "Gestion": 7, "Ciencias Naturales": 20,
+    "Artistica": 7, "Ingles": 20, "Religion": 7, "Tecnologia": 7,
+}
+PREGUNTAS_10 = {    # Decimo (cuadernillo grado 10°)
+    "Matematicas": 20, "Filosofia": 6, "Lengua Castellana": 20, "Etica": 6,
+    "Ciencias Sociales": 20, "C. Politicas": 6, "Quimica": 10, "Ed. Fisica": 6,
+    "Fisica": 10, "Religion": 6, "Ingles": 20, "Tecnologia": 6,
+}
+
+def preguntas_de(grado):
+    return PREGUNTAS_10 if grado == "Decimo" else PREGUNTAS_6A9
+
+def redondear_posible(valor, n_preg):
+    """Redondea 'valor' (0-100) HACIA ARRIBA al puntaje posible mas cercano
+    para un area de n_preg preguntas (cada pregunta vale 100/n_preg).
+    Ej.: 6 preguntas -> paso 16.67; un 20 sube al siguiente posible: 33.3."""
+    if not n_preg:
+        return valor
+    paso = 100.0 / n_preg
+    k = math.ceil(valor / paso - 1e-9)        # nro. de respuestas correctas (hacia arriba)
+    k = max(0, min(n_preg, k))
+    return round(k * paso, 1)
 
 # ─── Helpers de presentacion (mismos estilos del generador original) ───────────
 
@@ -247,7 +275,9 @@ def generar_segundo_periodo(estudiantes):
     nuevos = []
     for e in estudiantes:
         areas = list(e["notas"].keys())          # conserva el orden canonico
-        notas = {a: perturbar(e["notas"][a], rnd) for a in areas}
+        preg  = preguntas_de(e["grado"])          # nro. de preguntas por area del grado
+        notas = {a: redondear_posible(perturbar(e["notas"][a], rnd), preg.get(a))
+                 for a in areas}
         prom_full = statistics.fmean(notas.values())
         nuevos.append({
             "id":       str(e["id"]),

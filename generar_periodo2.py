@@ -30,6 +30,40 @@ PERIODO = "Segundo Periodo"
 
 SEED = 20262           # semilla fija -> resultados estables
 
+# Overrides manuales de notas de Segundo Periodo: (id, area) -> nota forzada.
+# Se aplican DESPUES de la generacion aleatoria (no alteran las demas notas) y
+# respetan el redondeo al puntaje posible segun preguntas por area.
+OVERRIDES = {
+    ("802008", "Matematicas"): 15.0,  # Felipe Beltran Diaz: correccion (0 -> similar al Primer Periodo)
+}
+
+# Estudiantes agregados manualmente al Segundo Periodo (sin Primer Periodo previo).
+# Se inyectan DESPUES de la generacion aleatoria (no alteran el stream ni las notas
+# de los demas) y reciben notas cercanas al promedio de su grupo, respetando el
+# puntaje posible segun preguntas por area.
+NUEVOS_ESTUDIANTES = [
+    {"id": "903039", "nombre": "EILEEN GONZALEZ POLO", "grupo": "Noveno C", "grado": "Noveno",
+     "archivo": "informes/Noveno/individuales/903039_GONZALEZ_POLO_EILEEN.html"},
+    {"id": "903040", "nombre": "LINDA RESTAN MARTINEZ", "grupo": "Noveno C", "grado": "Noveno",
+     "archivo": "informes/Noveno/individuales/903040_RESTAN_MARTINEZ_LINDA.html"},
+    {"id": "101033", "nombre": "JESUS VERGARA", "grupo": "Decimo A", "grado": "Decimo",
+     "archivo": "informes/Decimo/individuales/101033_VERGARA_JESUS.html"},
+    {"id": "604036", "nombre": "MARIA HOYOS", "grupo": "Sexto D", "grado": "Sexto",
+     "archivo": "informes/Sexto/individuales/604036_HOYOS_MARIA.html"},
+    {"id": "604037", "nombre": "SANTIAGO BARRETO", "grupo": "Sexto D", "grado": "Sexto",
+     "archivo": "informes/Sexto/individuales/604037_BARRETO_SANTIAGO.html"},
+    {"id": "605031", "nombre": "SAILETH AVILA", "grupo": "Sexto E", "grado": "Sexto",
+     "archivo": "informes/Sexto/individuales/605031_AVILA_SAILETH.html"},
+    {"id": "605032", "nombre": "DANIEL BERRIO", "grupo": "Sexto E", "grado": "Sexto",
+     "archivo": "informes/Sexto/individuales/605032_BERRIO_DANIEL.html"},
+]
+
+# Estudiantes retirados (no presentaron la prueba): se filtran DESPUES de la
+# generacion aleatoria para no alterar el stream ni las notas de los demas.
+REMOVIDOS = {
+    "605010",  # Gabriela Maria Hernandez Sierra (Sexto E): no estuvo en la prueba
+}
+
 COLORES_AREA = {
     "Matematicas":        "#4472C4",
     "Etica":              "#ED7D31",
@@ -76,6 +110,17 @@ def redondear_posible(valor, n_preg):
     paso = 100.0 / n_preg
     k = math.ceil(valor / paso - 1e-9)        # nro. de respuestas correctas (hacia arriba)
     k = max(0, min(n_preg, k))
+    return round(k * paso, 1)
+
+def redondear_cercano(valor, n_preg):
+    """Redondea 'valor' al puntaje posible MAS CERCANO (multiplo de 100/n_preg).
+    Se usa al sembrar notas de estudiantes nuevos centradas en un objetivo
+    (p.ej. el promedio del grupo), evitando el sesgo al alza del redondeo hacia
+    arriba. El resultado sigue siendo un puntaje alcanzable segun las preguntas."""
+    if not n_preg:
+        return valor
+    paso = 100.0 / n_preg
+    k = max(0, min(n_preg, round(valor / paso)))
     return round(k * paso, 1)
 
 # ─── Helpers de presentacion (mismos estilos del generador original) ───────────
@@ -278,6 +323,10 @@ def generar_segundo_periodo(estudiantes):
         preg  = preguntas_de(e["grado"])          # nro. de preguntas por area del grado
         notas = {a: redondear_posible(perturbar(e["notas"][a], rnd), preg.get(a))
                  for a in areas}
+        for a in areas:                                   # overrides manuales (post-aleatorio)
+            ov = OVERRIDES.get((str(e["id"]), a))
+            if ov is not None:
+                notas[a] = redondear_posible(ov, preg.get(a))
         prom_full = statistics.fmean(notas.values())
         nuevos.append({
             "id":       str(e["id"]),
@@ -289,6 +338,37 @@ def generar_segundo_periodo(estudiantes):
             "prom":     prom_full,
             "promedio": round(prom_full, 1),
             "archivo":  e["archivo"],
+        })
+    return nuevos
+
+def build_nuevos(alumnos):
+    """Construye los estudiantes agregados manualmente (NUEVOS_ESTUDIANTES) con
+    notas cercanas al promedio de su grupo (Segundo Periodo), con variacion leve
+    y reproducible, respetando el puntaje posible por area."""
+    por_grupo = {}
+    for a in alumnos:
+        por_grupo.setdefault(a["grupo"], []).append(a)
+    nuevos = []
+    for meta in NUEVOS_ESTUDIANTES:
+        miembros = por_grupo[meta["grupo"]]
+        areas = miembros[0]["areas"]                 # orden canonico del grado
+        preg  = preguntas_de(meta["grado"])
+        rnd   = random.Random(int(meta["id"]))       # variacion leve por estudiante
+        notas = {}
+        for ar in areas:
+            prom_area = statistics.fmean(m["notas"][ar] for m in miembros)
+            notas[ar] = redondear_cercano(prom_area + rnd.gauss(0, 4.0), preg.get(ar))
+        prom_full = statistics.fmean(notas.values())
+        nuevos.append({
+            "id":       meta["id"],
+            "nombre":   meta["nombre"],
+            "grupo":    meta["grupo"],
+            "grado":    meta["grado"],
+            "areas":    areas,
+            "notas":    notas,
+            "prom":     prom_full,
+            "promedio": round(prom_full, 1),
+            "archivo":  meta["archivo"],
         })
     return nuevos
 
@@ -774,6 +854,14 @@ def main():
 
     print(f"\n🎲 Generando resultados similares — {PERIODO} (semilla {SEED})...")
     alumnos = generar_segundo_periodo(estudiantes)
+    if REMOVIDOS:
+        antes = len(alumnos)
+        alumnos = [a for a in alumnos if a["id"] not in REMOVIDOS]
+        print(f"   - {antes - len(alumnos)} estudiantes retirados")
+    nuevos = build_nuevos(alumnos)                    # agregados manualmente (post-generacion)
+    if nuevos:
+        alumnos += nuevos
+        print(f"   + {len(nuevos)} estudiantes agregados manualmente")
 
     # Agrupar por grado conservando el orden de aparicion
     grados = []

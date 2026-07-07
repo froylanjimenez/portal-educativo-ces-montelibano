@@ -56,6 +56,8 @@ NUEVOS_ESTUDIANTES = [
      "archivo": "informes/Sexto/individuales/605031_AVILA_SAILETH.html"},
     {"id": "605032", "nombre": "DANIEL BERRIO", "grupo": "Sexto E", "grado": "Sexto",
      "archivo": "informes/Sexto/individuales/605032_BERRIO_DANIEL.html"},
+    {"id": "905035", "nombre": "ANDRES DIAZ MEZA", "grupo": "Noveno E", "grado": "Noveno",
+     "archivo": "informes/Noveno/individuales/905035_DIAZ_MEZA_ANDRES.html"},
 ]
 
 # Estudiantes retirados (no presentaron la prueba): se filtran DESPUES de la

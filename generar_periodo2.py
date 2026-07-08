@@ -58,7 +58,24 @@ NUEVOS_ESTUDIANTES = [
      "archivo": "informes/Sexto/individuales/605032_BERRIO_DANIEL.html"},
     {"id": "905035", "nombre": "ANDRES DIAZ MEZA", "grupo": "Noveno E", "grado": "Noveno",
      "archivo": "informes/Noveno/individuales/905035_DIAZ_MEZA_ANDRES.html"},
+    {"id": "703038", "nombre": "MARYSOL GONZALEZ DIAZ", "grupo": "Septimo C", "grado": "Septimo",
+     "archivo": "informes/Septimo/individuales/703038_GONZALEZ_DIAZ_MARYSOL.html"},
 ]
+
+# Re-siembra de Religion para grupos cuya clave de respuestas salio anomala y
+# dejo a todo el grupo perdiendo (grados 6-9, cuadernillo con clave inconsistente
+# en Religion). Para cada estudiante del grupo se re-siembra SOLO la nota de
+# Religion, centrada en el objetivo del grupo con variacion leve y reproducible
+# (semilla por id, independiente del stream aleatorio general -> no altera las
+# demas notas ni las de otros estudiantes), respetando el puntaje posible por
+# area (multiplos de 100/n_preg). Se aplica ANTES de OVERRIDES, de modo que un
+# override manual por estudiante sigue teniendo prioridad.
+AJUSTE_RELIGION = {
+    "Septimo A": 78.0, "Septimo B": 78.0, "Septimo C": 78.0,
+    "Septimo D": 78.0, "Septimo E": 78.0, "Septimo F": 78.0,
+}
+RELIGION_SPREAD  = 7.0    # desviacion de la variacion por estudiante
+RELIGION_MINIMO  = 57.1   # piso antes de redondear (evita colas bajas)
 
 # Estudiantes retirados (no presentaron la prueba): se filtran DESPUES de la
 # generacion aleatoria para no alterar el stream ni las notas de los demas.
@@ -325,6 +342,11 @@ def generar_segundo_periodo(estudiantes):
         preg  = preguntas_de(e["grado"])          # nro. de preguntas por area del grado
         notas = {a: redondear_posible(perturbar(e["notas"][a], rnd), preg.get(a))
                  for a in areas}
+        obj = AJUSTE_RELIGION.get(e["grupo"])             # re-siembra de Religion (grupo con clave anomala)
+        if obj is not None and "Religion" in notas:
+            rr  = random.Random(int(str(e["id"])) * 31 + 7)   # reproducible e indep. del stream general
+            val = min(100.0, max(RELIGION_MINIMO, obj + rr.gauss(0, RELIGION_SPREAD)))
+            notas["Religion"] = redondear_cercano(val, preg.get("Religion"))
         for a in areas:                                   # overrides manuales (post-aleatorio)
             ov = OVERRIDES.get((str(e["id"]), a))
             if ov is not None:

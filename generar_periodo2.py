@@ -35,6 +35,8 @@ SEED = 20262           # semilla fija -> resultados estables
 # respetan el redondeo al puntaje posible segun preguntas por area.
 OVERRIDES = {
     ("802008", "Matematicas"): 15.0,  # Felipe Beltran Diaz: correccion (0 -> similar al Primer Periodo)
+    ("702029", "Ingles"): 40.0,               # Esteban Alexis Mosquera Theran (7B): saca la nota de la zona critica
+    ("702029", "Ciencias Naturales"): 40.0,   # Esteban Alexis Mosquera Theran (7B): saca la nota de la zona critica
 }
 
 # Estudiantes agregados manualmente al Segundo Periodo (sin Primer Periodo previo).
